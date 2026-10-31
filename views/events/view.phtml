@@ -1,0 +1,48 @@
+<?php
+/** @var \Phalcon\Mvc\View\Engine\Php $this */
+$e      = $this->escaper;
+$badges = ['done' => 'success', 'pending' => 'info', 'processing' => 'info', 'failed' => 'warning', 'dead' => 'danger', 'held' => 'secondary'];
+$fields = ['id', 'event_id', 'game_key', 'universe_id', 'entity_key', 'sequence', 'event_type', 'occurred_at', 'status', 'attempts', 'next_attempt_at', 'last_error', 'processed_at', 'api_key_id', 'received_by_user_id', 'created_at', 'updated_at'];
+?>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Event <code><?= $e->escapeHtml((string) $event->event_id) ?></code></h1>
+  <a class="btn btn-sm btn-outline-secondary" href="/forum/events">&laquo; All events</a>
+</div>
+
+<div class="row">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <dl class="row mb-0">
+          <?php foreach ($fields as $field): ?>
+            <dt class="col-sm-5 text-muted"><?= $e->escapeHtml($field) ?></dt>
+            <dd class="col-sm-7">
+              <?php if ($field === 'status'): ?>
+                <span class="badge badge-<?= $badges[$event->status] ?? 'light' ?>"><?= $e->escapeHtml((string) $event->status) ?></span>
+              <?php elseif ($event->$field === null || $event->$field === ''): ?>
+                <span class="text-muted">—</span>
+              <?php else: ?>
+                <?= $e->escapeHtml((string) $event->$field) ?>
+              <?php endif ?>
+            </dd>
+          <?php endforeach ?>
+        </dl>
+      </div>
+      <?php if (in_array($event->status, ['failed', 'dead', 'held'], true)): ?>
+        <div class="card-footer">
+          <form method="post" action="/forum/events/retry/<?= (int) $event->id ?>">
+            <input type="hidden" name="<?= $e->escapeHtmlAttr($this->security->getTokenKey()) ?>" value="<?= $e->escapeHtmlAttr($this->security->getToken()) ?>">
+            <button type="submit" class="btn btn-warning btn-sm">Retry delivery</button>
+            <span class="text-muted small ml-2">Puts the event back on the queue; the worker runs every five minutes.</span>
+          </form>
+        </div>
+      <?php endif ?>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header py-2"><strong>Stored envelope</strong></div>
+      <pre class="card-body mb-0 small"><?= $e->escapeHtml((string) $envelopeJson) ?></pre>
+    </div>
+  </div>
+</div>

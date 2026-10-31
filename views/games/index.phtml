@@ -1,0 +1,72 @@
+<?php
+/** @var \Phalcon\Mvc\View\Engine\Php $this */
+$e = $this->escaper;
+?>
+<h1 class="h3 mb-3">Forum games</h1>
+
+<div class="card mb-3">
+  <div class="table-responsive">
+    <table class="table table-sm table-striped mb-0">
+      <thead>
+        <tr><th>Key</th><th>Name</th><th>Service user</th><th>Enabled</th><th>Created</th></tr>
+      </thead>
+      <tbody>
+        <?php if (count($games) === 0): ?>
+          <tr><td colspan="5" class="text-muted">No games registered yet.</td></tr>
+        <?php endif ?>
+        <?php foreach ($games as $game): ?>
+          <tr>
+            <td><code><?= $e->escapeHtml((string) $game->game_key) ?></code></td>
+            <td><?= $e->escapeHtml((string) $game->name) ?></td>
+            <td><?= $e->escapeHtml((string) ($userLabels[(int) $game->service_user_id] ?? '#' . $game->service_user_id)) ?></td>
+            <td><span class="badge badge-<?= (int) $game->enabled === 1 ? 'success' : 'secondary' ?>"><?= (int) $game->enabled === 1 ? 'Yes' : 'No' ?></span></td>
+            <td class="text-nowrap"><?= $e->escapeHtml((string) $game->created_at) ?></td>
+          </tr>
+        <?php endforeach ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<?php if (!empty($isAdmin)): ?>
+<div class="card">
+  <div class="card-header py-2"><strong>Register or update a game</strong></div>
+  <div class="card-body">
+    <?php if (!empty($errors)): ?>
+      <div class="alert alert-danger">
+        <ul class="mb-0">
+          <?php foreach ($errors as $error): ?>
+            <li><?= $e->escapeHtml((string) $error) ?></li>
+          <?php endforeach ?>
+        </ul>
+      </div>
+    <?php endif ?>
+    <form method="post" action="/forum/games/save">
+      <input type="hidden" name="<?= $e->escapeHtmlAttr($this->security->getTokenKey()) ?>" value="<?= $e->escapeHtmlAttr($this->security->getToken()) ?>">
+      <div class="form-row">
+        <div class="form-group col-md-3">
+          <label for="game_key">Game key</label>
+          <input class="form-control" id="game_key" name="game_key" pattern="[a-z0-9][a-z0-9-]*" maxlength="50" required placeholder="my-game" value="<?= $e->escapeHtmlAttr((string) $old['game_key']) ?>">
+          <small class="form-text text-muted">Lowercase letters, digits and hyphens; what the game puts in <code>game_key</code>.</small>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="name">Name</label>
+          <input class="form-control" id="name" name="name" maxlength="150" required placeholder="My Game" value="<?= $e->escapeHtmlAttr((string) $old['name']) ?>">
+        </div>
+        <div class="form-group col-md-4">
+          <label for="service_user_email">Service user email</label>
+          <input class="form-control" id="service_user_email" name="service_user_email" type="email" required placeholder="my-game@example.com" value="<?= $e->escapeHtmlAttr((string) $old['service_user_email']) ?>">
+          <small class="form-text text-muted">The Stack user whose API key the game sends with.</small>
+        </div>
+        <div class="form-group col-md-2 d-flex align-items-end">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="enabled" name="enabled" value="1"<?= !empty($old['enabled']) ? ' checked' : '' ?>>
+            <label class="form-check-label" for="enabled">Enabled</label>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </div>
+</div>
+<?php endif ?>

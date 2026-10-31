@@ -1,0 +1,79 @@
+<?php
+/** @var \Phalcon\Mvc\View\Engine\Php $this */
+/** @var string $controllerName */
+// Same grouping logic as app/modules/backend/views/partials/sidenav.phtml,
+// so this module's own "Forum" group (menu.php) renders as a treeview
+// here exactly as it does on a core backend page.
+$menu   = $this->moduleManager->mergedMenu('backend');
+$roleId = $this->session->get('auth')['role_id'] ?? null;
+
+$visible = array_values(array_filter(
+    $menu,
+    fn ($item) => $item['roles'] === null || in_array($roleId, $item['roles'], true)
+));
+
+$rendered = [];
+$groups   = [];
+
+foreach ($visible as $item) {
+    $group = $item['group'] ?? null;
+
+    if ($group === null) {
+        $rendered[] = ['type' => 'item', 'item' => $item];
+        continue;
+    }
+
+    if (!isset($groups[$group])) {
+        $groups[$group] = [];
+        $rendered[]      = ['type' => 'group', 'label' => $group];
+    }
+
+    $groups[$group][] = $item;
+}
+?>
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <a href="<?= $this->url->get('backend') ?>" class="brand-link">
+    <span class="brand-text font-weight-light"><?= $this->escaper->escapeHtml($this->settings->get('site_name', 'App Skeleton')) ?></span>
+  </a>
+  <div class="sidebar">
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+<?php foreach ($rendered as $entry): ?>
+<?php if ($entry['type'] === 'item'): ?>
+<?php $item = $entry['item']; ?>
+        <li class="nav-item">
+          <a href="<?= $this->url->get($item['url']) ?>" class="nav-link <?= $controllerName === $item['controller'] ? 'active' : '' ?>">
+            <i class="nav-icon <?= $item['icon'] ?>"></i>
+            <p><?= $this->escaper->escapeHtml($item['label']) ?></p>
+          </a>
+        </li>
+<?php else: ?>
+<?php
+  $children    = $groups[$entry['label']];
+  $groupActive = in_array($controllerName, array_column($children, 'controller'), true) || ($entry['label'] === 'Forum' && in_array($controllerName, ['events', 'games'], true));
+?>
+        <li class="nav-item has-treeview <?= $groupActive ? 'menu-open' : '' ?>">
+          <a href="#" class="nav-link <?= $groupActive ? 'active' : '' ?>">
+            <i class="nav-icon <?= $children[0]['icon'] ?>"></i>
+            <p>
+              <?= $this->escaper->escapeHtml($entry['label']) ?>
+              <i class="right fas fa-angle-left"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+<?php foreach ($children as $item): ?>
+            <li class="nav-item">
+              <a href="<?= $this->url->get($item['url']) ?>" class="nav-link <?= $controllerName === $item['controller'] ? 'active' : '' ?>">
+                <i class="nav-icon <?= $item['icon'] ?>"></i>
+                <p><?= $this->escaper->escapeHtml($item['label']) ?></p>
+              </a>
+            </li>
+<?php endforeach; ?>
+          </ul>
+        </li>
+<?php endif; ?>
+<?php endforeach; ?>
+      </ul>
+    </nav>
+  </div>
+</aside>

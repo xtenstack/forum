@@ -1,0 +1,97 @@
+<?php
+/** @var \Phalcon\Mvc\View\Engine\Php $this */
+$e      = $this->escaper;
+$badges = ['done' => 'success', 'pending' => 'info', 'processing' => 'info', 'failed' => 'warning', 'dead' => 'danger', 'held' => 'secondary'];
+$query  = static fn (array $extra): string => '/forum/events?' . http_build_query(array_merge($preserveQuery, $extra));
+?>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Forum events</h1>
+  <span class="text-muted"><?= (int) $listState['total'] ?> event<?= (int) $listState['total'] === 1 ? '' : 's' ?></span>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="get" action="/forum/events" class="form-inline">
+      <label class="mr-2" for="f-status">Status</label>
+      <select class="form-control form-control-sm mr-3" id="f-status" name="status">
+        <option value="all"<?= $currentStatus === 'all' ? ' selected' : '' ?>>all</option>
+        <?php foreach ($statuses as $status): ?>
+          <option value="<?= $e->escapeHtmlAttr($status) ?>"<?= $currentStatus === $status ? ' selected' : '' ?>><?= $e->escapeHtml($status) ?></option>
+        <?php endforeach ?>
+      </select>
+      <label class="mr-2" for="f-game">Game</label>
+      <select class="form-control form-control-sm mr-3" id="f-game" name="game">
+        <option value="all"<?= $currentGame === 'all' ? ' selected' : '' ?>>all</option>
+        <?php foreach ($games as $game): ?>
+          <option value="<?= $e->escapeHtmlAttr($game->game_key) ?>"<?= $currentGame === $game->game_key ? ' selected' : '' ?>><?= $e->escapeHtml($game->name . ' (' . $game->game_key . ')') ?></option>
+        <?php endforeach ?>
+      </select>
+      <label class="mr-2" for="f-type">Type</label>
+      <select class="form-control form-control-sm mr-3" id="f-type" name="type">
+        <option value="all"<?= $currentType === 'all' ? ' selected' : '' ?>>all</option>
+        <?php foreach ($eventTypes as $type): ?>
+          <option value="<?= $e->escapeHtmlAttr($type) ?>"<?= $currentType === $type ? ' selected' : '' ?>><?= $e->escapeHtml($type) ?></option>
+        <?php endforeach ?>
+      </select>
+      <input class="form-control form-control-sm mr-2" type="search" name="q" placeholder="event id / entity key / error" value="<?= $e->escapeHtmlAttr($listState['q']) ?>">
+      <button class="btn btn-sm btn-primary" type="submit">Filter</button>
+      <a class="btn btn-sm btn-link" href="/forum/events">Reset</a>
+    </form>
+  </div>
+</div>
+
+<?php if (count($events) === 0): ?>
+  <p class="text-muted">No events match.</p>
+<?php else: ?>
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-sm table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Received</th>
+            <th>Game</th>
+            <th>Uni</th>
+            <th>Type</th>
+            <th>Entity</th>
+            <th>Occurred</th>
+            <th>Status</th>
+            <th class="text-right">Attempts</th>
+            <th>Last error</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($events as $event): ?>
+            <tr>
+              <td class="text-nowrap"><?= $e->escapeHtml((string) $event->created_at) ?></td>
+              <td class="text-nowrap"><?= $e->escapeHtml((string) $event->game_key) ?></td>
+              <td><?= (int) $event->universe_id ?></td>
+              <td class="text-nowrap"><code><?= $e->escapeHtml((string) $event->event_type) ?></code></td>
+              <td class="text-nowrap"><code><?= $e->escapeHtml((string) $event->entity_key) ?></code></td>
+              <td class="text-nowrap"><?= $e->escapeHtml(substr((string) $event->occurred_at, 0, 19)) ?></td>
+              <td><span class="badge badge-<?= $badges[$event->status] ?? 'light' ?>"><?= $e->escapeHtml((string) $event->status) ?></span></td>
+              <td class="text-right"><?= (int) $event->attempts ?></td>
+              <td class="text-muted small"><?= $e->escapeHtml(mb_strimwidth((string) $event->last_error, 0, 80, '…')) ?></td>
+              <td class="text-right"><a href="/forum/events/view/<?= (int) $event->id ?>">View</a></td>
+            </tr>
+          <?php endforeach ?>
+        </tbody>
+      </table>
+    </div>
+    <?php if ((int) $listState['totalPages'] > 1): ?>
+      <div class="card-footer d-flex justify-content-between align-items-center">
+        <?php if ((int) $listState['page'] > 1): ?>
+          <a class="btn btn-sm btn-outline-secondary" href="<?= $e->escapeHtmlAttr($query(['page' => (int) $listState['page'] - 1])) ?>">&laquo; Previous</a>
+        <?php else: ?>
+          <span></span>
+        <?php endif ?>
+        <span class="text-muted">Page <?= (int) $listState['page'] ?> of <?= (int) $listState['totalPages'] ?></span>
+        <?php if ((int) $listState['page'] < (int) $listState['totalPages']): ?>
+          <a class="btn btn-sm btn-outline-secondary" href="<?= $e->escapeHtmlAttr($query(['page' => (int) $listState['page'] + 1])) ?>">Next &raquo;</a>
+        <?php else: ?>
+          <span></span>
+        <?php endif ?>
+      </div>
+    <?php endif ?>
+  </div>
+<?php endif ?>

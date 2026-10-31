@@ -1,0 +1,14 @@
+{
+    "key": "forum",
+    "name": "Forum",
+    "code": "frm",
+    "tier": "plugin",
+    "className": "Forum\\Module",
+    "surface": "backend",
+    "menu": "menu.php",
+    "migrations": "migrations",
+    "routes": false,
+    "license": {
+        "keyRequired": false
+    }
+}

@@ -1,0 +1,75 @@
+<?php
+/** @var \Phalcon\Mvc\View\Engine\Php $this */
+// Mirrors app/modules/backend/views/index.phtml's AdminLTE wrapper, the
+// same copy the contacts and announcements plugins carry (CLAUDE.md: no
+// cross-module reach-ins). Both Forum screens are admin/operator only.
+$controllerName = $this->dispatcher->getControllerName();
+
+$allowedPalettes = ['blue', 'purple', 'green', 'orange', 'stack'];
+$allowedModes    = ['light', 'dark', 'auto'];
+$userSettings    = $this->session->get('user_settings') ?? [];
+$themePalette    = $userSettings['theme_palette'] ?? $this->settings->get('default_theme_palette', 'blue');
+$themeMode       = $userSettings['theme_mode'] ?? $this->settings->get('default_theme_mode', 'auto');
+
+if (!in_array($themePalette, $allowedPalettes, true)) {
+    $themePalette = 'blue';
+}
+
+if (!in_array($themeMode, $allowedModes, true)) {
+    $themeMode = 'auto';
+}
+?>
+<!DOCTYPE html>
+<html lang="en" data-palette="<?= $this->escaper->escapeHtmlAttr($themePalette) ?>" data-mode="<?= $this->escaper->escapeHtmlAttr($themeMode) ?>">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= $this->escaper->escapeHtml($this->settings->get('site_name', 'App Skeleton')) ?> — Forum</title>
+    <meta name="csrf-key" content="<?= $this->escaper->escapeHtml($this->security->getTokenKey()) ?>">
+    <meta name="csrf-token" content="<?= $this->escaper->escapeHtml($this->security->getToken()) ?>">
+    <link rel="stylesheet" href="/assets/adminlte/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="/assets/adminlte/css/adminlte.min.css">
+    <link rel="stylesheet" href="/assets/css/theme.css">
+  </head>
+  <body class="sidebar-mini layout-fixed">
+<?php
+$flashTypeClasses = [
+    'success' => 'alert-success',
+    'error'   => 'alert-danger',
+    'notice'  => 'alert-info',
+    'warning' => 'alert-warning',
+];
+$flashHtml = '';
+foreach ($this->flash->getMessages() as $flashType => $flashMessages) {
+    foreach ($flashMessages as $flashMessage) {
+        $flashHtml .= '<div class="alert alert-dismissible fade show ' . ($flashTypeClasses[$flashType] ?? 'alert-secondary') . '">'
+            . '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'
+            . $this->escaper->escapeHtml($flashMessage)
+            . '</div>';
+    }
+}
+$this->flash->clear();
+?>
+    <div class="wrapper">
+      <?= $this->partial('partials/topnav') ?>
+
+      <?= $this->partial('partials/sidenav', ['controllerName' => $controllerName]) ?>
+
+      <div class="content-wrapper">
+        <div class="content">
+          <div class="container-fluid">
+            <?= $flashHtml ?>
+            <?= $this->getContent() ?>
+          </div>
+        </div>
+      </div>
+
+      <?= $this->partial('partials/footer') ?>
+    </div>
+
+    <script src="/assets/adminlte/plugins/jquery/jquery.min.js"></script>
+    <script src="/assets/adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/adminlte/js/adminlte.min.js"></script>
+    <script src="/assets/js/app.js"></script>
+  </body>
+</html>

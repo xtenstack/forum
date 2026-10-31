@@ -1,0 +1,16 @@
+{
+    "name": "xtendeploy/forum",
+    "description": "Forum plugin: the XTen.Stack service boundary between XTen games and the shared Flarum community — accepts game-owned user, alliance, membership and tutorial events over a per-game API key, keeps an idempotent audit queue, and applies them to Flarum asynchronously (Forum-Service-Interface v0.1).",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "require": {
+        "php": "^8.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Forum\\": "src/",
+            "App_skeleton\\Modules\\Cli\\Tasks\\": "src/tasks/"
+        }
+    }
+}

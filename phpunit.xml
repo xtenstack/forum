@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Stack-backed suite, run from an app_skeleton root with this plugin
+  installed (composer.local.json path repo) and enabled. The contract
+  suite drives the `forum` service in-process against the configured
+  database — run it on PostgreSQL, MySQL/MariaDB and SQLite (the
+  contract's release gate) by pointing APP_CONFIG_LOCAL at each config:
+
+    APP_CONFIG_LOCAL=/path/config.sqlite.php vendor/bin/phpunit -c vendor/xtendeploy/forum/phpunit.xml
+
+  ForumHttpTest drives POST /api/forum/v1/events over real HTTP and needs
+  APP_TEST_BASE_URL (php -S or the Docker stack); it skips itself otherwise.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true">
+  <testsuites>
+    <testsuite name="Forum">
+      <file>tests/ForumContractTest.php</file>
+      <file>tests/ForumHttpTest.php</file>
+    </testsuite>
+  </testsuites>
+</phpunit>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Pure-PHP suite: no stack, no Phalcon, no database. From any checkout
+  with a PHPUnit 10 binary, e.g. app_skeleton's:
+
+    <app_skeleton>/vendor/bin/phpunit -c <plugins>/forum/phpunit.unit.xml
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/unit-bootstrap.php"
+         colors="true">
+  <testsuites>
+    <testsuite name="Forum unit">
+      <directory>tests/Unit</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
