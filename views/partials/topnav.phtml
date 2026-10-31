@@ -26,11 +26,23 @@ $apps = array_filter(
   </ul>
 <?php endif; ?>
   <ul class="navbar-nav ml-auto">
-    <li class="nav-item">
-      <a class="nav-link" href="<?= $this->url->get('backend/account') ?>">My Profile</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="<?= $this->url->get('backend/session/logout') ?>">Log out</a>
+    <li class="nav-item dropdown">
+      <a class="nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-ellipsis-v"></i>
+      </a>
+      <div class="dropdown-menu dropdown-menu-right">
+<?php
+$auth        = $this->session->get('auth') ?? [];
+$displayName = trim(($auth['first_name'] ?? '') . ' ' . ($auth['last_name'] ?? '')) ?: ($auth['email'] ?? null);
+?>
+<?php if ($displayName): ?>
+        <span class="dropdown-item-text text-muted small text-truncate d-block" style="max-width: 220px;"><?= $this->escaper->escapeHtml($displayName) ?></span>
+        <div class="dropdown-divider"></div>
+<?php endif; ?>
+        <a href="<?= $this->url->get('backend/account') ?>" class="dropdown-item"><i class="fas fa-id-badge mr-2"></i>My Profile</a>
+        <div class="dropdown-divider"></div>
+        <a href="<?= $this->url->get('backend/session/logout') ?>" class="dropdown-item"><i class="fas fa-sign-out-alt mr-2"></i>Log out</a>
+      </div>
     </li>
   </ul>
 </nav>
