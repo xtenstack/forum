@@ -14,3 +14,8 @@ here: the XTen.Stack platform app_skeleton (MIT), PHP (PHP License) and the
 Phalcon framework (BSD-3-Clause). The plugin talks to a Flarum instance
 (Flarum is MIT-licensed software, installed and operated separately; this
 repository contains none of it).
+
+Nothing in the MIT License or this notice excludes, restricts, or modifies
+any right or remedy that cannot lawfully be excluded under applicable law,
+including the Australian Consumer Law where applicable. Paid support plans
+are available separately at https://deploy.xten.au.
